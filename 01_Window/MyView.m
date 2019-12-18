@@ -118,7 +118,7 @@
     exit(0);
 }
 
-- (void)onLongPress:(UITapPressGestureRecognizer *)gr
+- (void)onLongPress:(UILongPressGestureRecognizer *)gr
 {
     // code
     centralText = @"'onLongPress' Event Occured";

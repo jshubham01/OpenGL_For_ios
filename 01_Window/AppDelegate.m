@@ -15,6 +15,7 @@
     UIWindow *mainWindow;
     ViewController *mainViewController;
     MyView *myView;
+}
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:
     (NSDictionary *)launchOptions

@@ -2,7 +2,7 @@
 //  GLView.m
 //  Window
 //
-//  Created by user159339 on 12/21/19.
+//  Created by shubham_at_astromedicomp on 12/21/19.
 //
 #import <OpenGLES/ES3/gl.h>
 #import <OpenGLES/ES3/glext.h>

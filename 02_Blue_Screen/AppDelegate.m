@@ -7,7 +7,7 @@
 
 #import "AppDelegate.h"
 #import "ViewController.h"
-#import "GLView.h"
+#import "GLESView.h"
 
 @implementation AppDelegate
 {
@@ -31,7 +31,7 @@
     [mainWindow setRootViewController:mainViewController];
 
     // initialize view variable corresponding to screen bounds
-    glView = [[GLView alloc]initWithFrame:screenBounds];
+    glView = [[GLESView alloc]initWithFrame:screenBounds];
 
     [mainViewController setView:glView];
 
@@ -41,7 +41,7 @@
 
     [mainWindow makeKeyAndVisible];
 
-    [glView startAnimation]
+    [glView startAnimation];
 
     return (YES);
 }

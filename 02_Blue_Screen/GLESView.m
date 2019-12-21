@@ -4,15 +4,16 @@
 //
 //  Created by user159339 on 12/21/19.
 //
-
+#import <OpenGLES/ES3/gl.h>
+#import <OpenGLES/ES3/glext.h>
 #import "GLESView.h"
 
 @implementation GLESView{
     EAGLContext *eaglContext;
 
-    GLuint defaultFrameBuffer;
-    GLuint colorRenderBuffer;
-    GLuint depthRenderBuffer;
+    GLuint defaultFramebuffer;
+    GLuint colorRenderbuffer;
+    GLuint depthRenderbuffer;
 
     id displayLink;
     NSInteger animationFrameInterval;
@@ -34,19 +35,19 @@
             kEAGLDrawablePropertyRetainedBacking, kEAGLColorFormatRGBA8,
              kEAGLDrawablePropertyColorFormat, nil];
 
-        eaglLayer = [[EAGLContext alloc]initWithAPI:kEAGLRenderingAPIOpenGLES3];
-        if(nil == eaglLayer)
+        eaglContext = [[EAGLContext alloc]initWithAPI:kEAGLRenderingAPIOpenGLES3];
+        if(nil == eaglContext)
         {
             [self release];
             return(nil);
         }
 
-        [EAGLContext setCurrentContext:eagleContext];
+        [EAGLContext setCurrentContext:eaglContext];
 
         glGenFramebuffers(1, &defaultFramebuffer);
-        glBindFrameBuffer(GL_FRAMEBUFFER, defaultFrameBuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer);
 
-        glGenRenderbuffers(1, &colorRenderBuffer);
+        glGenRenderbuffers(1, &colorRenderbuffer);
         glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
 
         [eaglContext renderbufferStorage:GL_RENDERBUFFER fromDrawable:eaglLayer];
@@ -71,18 +72,18 @@
             &backingHeight
         );
 
-        glGenRenderbuffers(1, &depthRenderBuffer);
-        glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
+        glGenRenderbuffers(1, &depthRenderbuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, backingWidth, backingHeight);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
 
         if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         {
             printf("Failed to create complete framebuffer object: %s \n",
                 glCheckFramebufferStatus(GL_FRAMEBUFFER));
-            glDeleteFramebuffers(1, &defaultFrameBuffer);
+            glDeleteFramebuffers(1, &defaultFramebuffer);
             glDeleteRenderbuffers(1, &colorRenderbuffer);
-            glDeleteRenderbuffers(1, &depthRenderBuffer);
+            glDeleteRenderbuffers(1, &depthRenderbuffer);
 
             return(nil);
         }
@@ -146,11 +147,11 @@
 {
     [EAGLContext setCurrentContext:eaglContext];
 
-    glBindFrameBuffer(GL_FRAMEBUFFER, defaultFrameBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
-    [eaglContext presentRenderBuffer:GL_RENDERBUFFER];
+    [eaglContext presentRenderbuffer:GL_RENDERBUFFER];
 }
 
 -(void)layoutSubviews // this is like redraw
@@ -159,16 +160,16 @@
     GLint height;
 
     // code
-    glBindRenderbuffer(GL_RENDERBUFFER, colorRenderBuffer);
-    [eaglContext renderbufferStorage:GL_RENDERBUFFER, fromDrawable:(CAEAGLLayer *)self.layer];
+    glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
+    [eaglContext renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer *)self.layer];
 
     glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
     glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
 
-    glGenRenderbuffers(1, &depthRenderBuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
+    glGenRenderbuffers(1, &depthRenderbuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
 
     glViewport(0, 0, width, height);
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -185,12 +186,11 @@
     if(!isAnimating)
     {
         displayLink = [
-            NSClassFromString(@"CADisplayLink") displayLinkWithTarget:self selector:@selector(drawView:);
+            NSClassFromString(@"CADisplayLink") displayLinkWithTarget:self selector:@selector(drawView:)];
             [displayLink setPreferredFramesPerSecond:animationFrameInterval];
-            [displayLink addToRunLoop:[NSRunLoop] currentRunLoop] forMode:NSDefaultRunLoopMode];
-
-            isAnimating:YES;
-        ]
+            [displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+				
+    isAnimating:YES;
     }
 }
 
@@ -245,22 +245,22 @@
 
 - (void)dealloc
 {
-    if(depthRenderBuffer)
+    if(depthRenderbuffer)
     {
-        glDeleteRenderbuffers(1, &depthRenderBuffer);
-        depthRenderBuffer = 0;
+        glDeleteRenderbuffers(1, &depthRenderbuffer);
+        depthRenderbuffer = 0;
     }
 
-    if(colorRenderBuffer)
+    if(colorRenderbuffer)
     {
-        glDeleteRenderbuffers(1, &colorRenderBuffer);
-        colorRenderBuffer = 0;
+        glDeleteRenderbuffers(1, &colorRenderbuffer);
+        colorRenderbuffer = 0;
     }
 
-    if(defaultFrameBuffer)
+    if(defaultFramebuffer)
     {
-        glDeleteFramebuffers(1, &defaultFrameBuffer);
-        defaultFrameBuffer = 0;
+        glDeleteFramebuffers(1, &defaultFramebuffer);
+        defaultFramebuffer = 0;
     }
 
     if([EAGLContext currentContext] == eaglContext)
@@ -268,8 +268,8 @@
         [EAGLContext setCurrentContext:nil];
     }
 
-    [eagleContext release];
-    eagleContext = nil;
+    [eaglContext release];
+    eaglContext = nil;
 
     [super dealloc];
 }

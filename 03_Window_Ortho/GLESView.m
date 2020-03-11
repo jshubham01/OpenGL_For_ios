@@ -1,11 +1,9 @@
 //
-//  GLView.m
-//  Window
-//
 //  Created by shubham_at_astromedicomp on 12/21/19.
 //
 #import <OpenGLES/ES3/gl.h>
 #import <OpenGLES/ES3/glext.h>
+
 #import "GLESView.h"
 
 #import "vmath.h"
@@ -20,8 +18,7 @@ enum
 
 @implementation GLESView
 {
-    GLfloat fWidth;
-    GLfloat fHeight;
+
 
     EAGLContext *eaglContext;
 
@@ -57,7 +54,7 @@ enum
         eaglLayer.drawableProperties=[NSDictionary dictionaryWithObjectsAndKeys:
             [NSNumber numberWithBool:FALSE],
             kEAGLDrawablePropertyRetainedBacking, kEAGLColorFormatRGBA8,
-             kEAGLDrawablePropertyColorFormat, nil];
+            kEAGLDrawablePropertyColorFormat, nil];
 
         eaglContext = [[EAGLContext alloc]initWithAPI:kEAGLRenderingAPIOpenGLES3];
         if(nil == eaglContext)
@@ -69,9 +66,9 @@ enum
         [EAGLContext setCurrentContext:eaglContext];
 
         glGenFramebuffers(1, &defaultFramebuffer);
-        glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer);
-
         glGenRenderbuffers(1, &colorRenderbuffer);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer);
         glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
 
         [eaglContext renderbufferStorage:GL_RENDERBUFFER fromDrawable:eaglLayer];
@@ -82,8 +79,9 @@ enum
             GL_RENDERBUFFER,
             colorRenderbuffer);
 
-        GLuint backingWidth;
-        GLuint backingHeight;
+        GLint backingHeight;
+        GLint backingWidth;
+
         glGetRenderbufferParameteriv(
             GL_RENDERBUFFER,
             GL_RENDERBUFFER_WIDTH,
@@ -122,7 +120,7 @@ enum
     vertexShaderObject = glCreateShader(GL_VERTEX_SHADER);
 
         const GLchar *vertexShaderSourceCode =
-            "#version 410 core" \
+            "#version 300 es" \
             "\n" \
             "in vec4 vPosition;" \
             "uniform mat4 u_mvp_matrix;" \
@@ -167,7 +165,7 @@ enum
                         szInfoLog
                     );
 
-                    print("VERTEX SHADER FATAL ERROR: %s\n", szInfoLog);
+                    printf("VERTEX SHADER FATAL ERROR: %s\n", szInfoLog);
                     free(szInfoLog);
                     [self release];
                 }
@@ -183,8 +181,9 @@ enum
 
         fragmentShaderObject = glCreateShader(GL_FRAGMENT_SHADER);
         const GLchar *pcFragmentShaderSourceCode = 
-        "#version 410 core" \
+        "#version 300 es" \
         "\n" \
+        "precision highp float;" \
         "out vec4 vFragColor;" \
         "void main(void)" \
         "{" \
@@ -225,7 +224,7 @@ enum
                             szInfoLog
                         );
 
-                    print( ("FRAGMENT SHADER FATAL COMPILATION ERROR: %s\n"), szInfoLog);
+                    printf( ("FRAGMENT SHADER FATAL COMPILATION ERROR: %s\n"), szInfoLog);
                     free(szInfoLog);
                     [self release];
                 }
@@ -270,7 +269,7 @@ enum
                     GLsizei written;
                     glGetProgramInfoLog(shaderProgramObject, iInfoLogLength,
                         &written, szInfoLog);
-                    print("Shader Program Link Log: %s \n", szInfoLog);
+                    printf("Shader Program Link Log: %s \n", szInfoLog);
                     free(szInfoLog);
                     [self release];
                 }
@@ -376,6 +375,18 @@ enum
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glUseProgram(shaderProgramObject);
+
+    vmath::mat4 modelViewMatrix = vmath::mat4::identity();
+    vmath::mat4 modelViewProjectionMatrix = vmath::mat4::identity();
+
+    modelViewProjectionMatrix = orthographicProjectionMatrix * modelViewMatrix;
+    glUniformMatrix4fv(mvpUniform, 1, GL_FALSE, modelViewProjectionMatrix);
+
+    glBindVertexArray(vao);
+    glDrawArrays(GL_TRIANGLES, 	0,	3);
+    glBindVertexArray(0);
+    glUseProgram(0);
 
     glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
     [eaglContext presentRenderbuffer:GL_RENDERBUFFER];
@@ -400,22 +411,26 @@ enum
 
     glViewport(0, 0, width, height);
 
+    GLfloat fWidth;
+    GLfloat fHeight;
 
     fWidth = (GLfloat)width;
     fHeight = (GLfloat)height;
     if (width <= height)
     {
         orthographicProjectionMatrix = vmath::ortho(-100.0f, 100.0f,
-            (-100.0f * ((GLfloat)fHeight / (GLfloat)fWidth)),
-            (100.0f * ((GLfloat)fHeight / (GLfloat)fWidth)),
-            -100.0f, 100.0f);
+                -100.0f * (fHeight / fWidth),
+                100.0f * (fHeight / fWidth),
+                -100.0f, 100.0f
+            );
     }
     else
     {
         orthographicProjectionMatrix = vmath::ortho(
-            (-100.0f * ((GLfloat)fWidth / (GLfloat)fHeight)),
-            (100.0f * ((GLfloat)fWidth / (GLfloat)fHeight)),
-            -100.0f, 100.0f, -100.0f, 100.0f);
+                -100.0f * (fWidth / fHeight), 
+                100.0f * (fWidth / fHeight),
+                -100.0f, 100.0f, -100.0f, 100.0f
+            );
     }
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)

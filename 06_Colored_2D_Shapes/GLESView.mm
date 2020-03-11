@@ -199,6 +199,7 @@ GLfloat fangleRectangle = 0.0f;
         "#version 300 es" \
         "\n" \
         "precision highp float;" \
+        "in vec4 voutColor;" \
         "out vec4 vFragColor;" \
         "void main(void)" \
         "{" \

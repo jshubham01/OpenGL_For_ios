@@ -120,7 +120,7 @@ enum
         animationFrameInterval = 60; // default since iOS 8.2
         /*************************************************/
 
-        vertexShaderObject = glCreateShader(GL_VERTEX_SHADER);
+    vertexShaderObject = glCreateShader(GL_VERTEX_SHADER);
 
         const GLchar *vertexShaderSourceCode =
             "#version 300 es" \
@@ -380,10 +380,9 @@ enum
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     glUseProgram(shaderProgramObject);
 
+modelViewMatrix = vmath::translate(0.0f, 0.0f, -3.0f);
     vmath::mat4 modelViewMatrix = vmath::mat4::identity();
     vmath::mat4 modelViewProjectionMatrix = vmath::mat4::identity();
-
-    modelViewMatrix = vmath::translate(0.0f, 0.0f, -3.0f);
 
     modelViewProjectionMatrix = perspectiveProjectionMatrix * modelViewMatrix;
     glUniformMatrix4fv(mvpUniform, 1, GL_FALSE, modelViewProjectionMatrix);

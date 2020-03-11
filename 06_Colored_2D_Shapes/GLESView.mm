@@ -132,7 +132,7 @@ GLfloat fangleRectangle = 0.0f;
         vertexShaderObject = glCreateShader(GL_VERTEX_SHADER);
 
         const GLchar *vertexShaderSourceCode =
-            "#version 410 core" \
+            "#version 300 es" \
             "\n" \
             "in vec4 vPosition;" \
             "in vec4 vColor;" \
@@ -196,9 +196,9 @@ GLfloat fangleRectangle = 0.0f;
 
         fragmentShaderObject = glCreateShader(GL_FRAGMENT_SHADER);
         const GLchar *pcFragmentShaderSourceCode = 
-        "#version 410 core" \
+        "#version 300 es" \
         "\n" \
-        "in vec4 voutColor;" \
+        "precision highp float;" \
         "out vec4 vFragColor;" \
         "void main(void)" \
         "{" \

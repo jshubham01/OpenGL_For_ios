@@ -180,10 +180,9 @@ GLfloat fangleRectangle = 0.0f;
                         szInfoLog
                     );
 
-                    fprintf(gpFile, "VERTEX SHADER FATAL ERROR: %s\n", szInfoLog);
+                    printf("VERTEX SHADER FATAL ERROR: %s\n", szInfoLog);
                     free(szInfoLog);
                     [self release];
-                    [NSApp terminate:self];
                 }
             }
         }
@@ -240,10 +239,9 @@ GLfloat fangleRectangle = 0.0f;
                             szInfoLog
                         );
 
-                    fprintf(gpFile, ("FRAGMENT SHADER FATAL COMPILATION ERROR: %s\n"), szInfoLog);
+                    printf( ("FRAGMENT SHADER FATAL COMPILATION ERROR: %s\n"), szInfoLog);
                     free(szInfoLog);
                     [self release];
-                    [NSApp terminate:self];
                 }
             }
         }
@@ -290,10 +288,9 @@ GLfloat fangleRectangle = 0.0f;
                     GLsizei written;
                     glGetProgramInfoLog(shaderProgramObject, iInfoLogLength,
                         &written, szInfoLog);
-                    fprintf(gpFile, "Shader Program Link Log: %s \n", szInfoLog);
+                    printf("Shader Program Link Log: %s \n", szInfoLog);
                     free(szInfoLog);
                     [self release];
-                    [NSApp terminate:self];
                 }
             }
         }
@@ -658,17 +655,28 @@ GLfloat fangleRectangle = 0.0f;
 
 - (void)dealloc
 {
-
     if(vbo_triangle_pos)
     {
         glDeleteBuffers(1, &vbo_triangle_pos);
         vbo_triangle_pos = 0;
     }
 
+    if(vbo_color_triangle)
+    {
+        glDeleteBuffers(1, &vbo_color_triangle);
+        vbo_color_triangle = 0;
+    }
+
     if(vbo_rectangle_pos)
     {
         glDeleteBuffers(1, &vbo_rectangle_pos);
         vbo_rectangle_pos = 0;
+    }
+
+    if(vbo_color_rectangle)
+    {
+        glDeleteBuffers(1, &vbo_color_rectangle);
+        vbo_color_rectangle = 0;
     }
 
     if (vao_triangle)
@@ -682,7 +690,6 @@ GLfloat fangleRectangle = 0.0f;
         glDeleteVertexArrays(1, &vao_rectangle);
         vao_rectangle = 0;
     }
-
     if(depthRenderbuffer)
     {
         glDeleteRenderbuffers(1, &depthRenderbuffer);

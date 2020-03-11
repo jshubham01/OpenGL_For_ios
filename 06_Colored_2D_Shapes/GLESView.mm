@@ -18,6 +18,9 @@ enum
     AMC_ATTRIBUTE_TEXTURE0
 };
 
+GLfloat fangleTriangle = 0.0f;
+GLfloat fangleRectangle = 0.0f;
+
 @implementation GLESView
 {
     EAGLContext *eaglContext;
@@ -32,8 +35,12 @@ enum
 
     GLuint vao_triangle;
     GLuint vao_rectangle;
+
     GLuint vbo_triangle_pos;
     GLuint vbo_rectangle_pos;
+
+    GLuint vbo_color_triangle;
+    GLuint vbo_color_rectangle;
 
     GLuint mvpUniform;
     vmath:: mat4 perspectiveProjectionMatrix;
@@ -125,13 +132,16 @@ enum
         vertexShaderObject = glCreateShader(GL_VERTEX_SHADER);
 
         const GLchar *vertexShaderSourceCode =
-            "#version 300 es" \
+            "#version 410 core" \
             "\n" \
             "in vec4 vPosition;" \
+            "in vec4 vColor;" \
             "uniform mat4 u_mvp_matrix;" \
+            "out vec4 voutColor;" \
             "void main(void)" \
             "{" \
-            "gl_Position = u_mvp_matrix * vPosition;" \
+                "gl_Position = u_mvp_matrix * vPosition;" \
+                "voutColor = vColor;" \
             "}";
 
         // specify above code of shader to vertext shader object
@@ -170,9 +180,10 @@ enum
                         szInfoLog
                     );
 
-                    printf("VERTEX SHADER FATAL ERROR: %s\n", szInfoLog);
+                    fprintf(gpFile, "VERTEX SHADER FATAL ERROR: %s\n", szInfoLog);
                     free(szInfoLog);
                     [self release];
+                    [NSApp terminate:self];
                 }
             }
         }
@@ -186,13 +197,13 @@ enum
 
         fragmentShaderObject = glCreateShader(GL_FRAGMENT_SHADER);
         const GLchar *pcFragmentShaderSourceCode = 
-        "#version 300 es" \
+        "#version 410 core" \
         "\n" \
-        "precision highp float;" \
+        "in vec4 voutColor;" \
         "out vec4 vFragColor;" \
         "void main(void)" \
         "{" \
-        "vFragColor = vec4(1.0, 1.0, 1.0, 1.0);" \
+        "vFragColor = voutColor;" \
         "}";
 
         // specify above code of shader to vertext shader object
@@ -229,9 +240,10 @@ enum
                             szInfoLog
                         );
 
-                    printf( ("FRAGMENT SHADER FATAL COMPILATION ERROR: %s\n"), szInfoLog);
+                    fprintf(gpFile, ("FRAGMENT SHADER FATAL COMPILATION ERROR: %s\n"), szInfoLog);
                     free(szInfoLog);
                     [self release];
+                    [NSApp terminate:self];
                 }
             }
         }
@@ -250,12 +262,16 @@ enum
             AMC_ATTRIBUTE_POSITION,
             "vPosition");
 
+        glBindAttribLocation(shaderProgramObject,
+            AMC_ATTRIBUTE_COLOR,
+            "vColor");
+
         // link the shader
         glLinkProgram(shaderProgramObject);
 
         GLint iShaderProgramLinkStatus = 0;
         iInfoLogLength = 0;
-        
+
         glGetProgramiv(shaderProgramObject,
             GL_LINK_STATUS,
             &iShaderProgramLinkStatus);
@@ -274,9 +290,10 @@ enum
                     GLsizei written;
                     glGetProgramInfoLog(shaderProgramObject, iInfoLogLength,
                         &written, szInfoLog);
-                    printf("Shader Program Link Log: %s \n", szInfoLog);
+                    fprintf(gpFile, "Shader Program Link Log: %s \n", szInfoLog);
                     free(szInfoLog);
                     [self release];
+                    [NSApp terminate:self];
                 }
             }
         }
@@ -288,10 +305,16 @@ enum
             "u_mvp_matrix"
         );
 
-
-        const GLfloat ftriangleVertices[] = {0.0f, 1.0f, 0.0f,
+        const GLfloat ftriangleVertices[] = {
+                0.0f, 1.0f, 0.0f,
                 -1.0f, -1.0f, 0.0f,
-                1.0f, -1.0f, 0.0f};
+                1.0f, -1.0f, 0.0f
+            };
+
+        const GLfloat ftriangleColors[] = { 1.0f, 0.0f, 0.0f,
+                    0.0f, 1.0f, 0.0f,
+                    0.0f, 0.0f, 1.0f
+            };
 
         glGenVertexArrays(1, &vao_triangle);
         glBindVertexArray(vao_triangle);
@@ -315,13 +338,41 @@ enum
         glEnableVertexAttribArray(AMC_ATTRIBUTE_POSITION);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        //
+        // working on colors triangle
+        //
+        glGenBuffers(1, &vbo_color_triangle);
+        glBindBuffer(GL_ARRAY_BUFFER,
+            vbo_color_triangle);
+
+        glBufferData(GL_ARRAY_BUFFER,
+            sizeof(ftriangleColors),
+            ftriangleColors,
+            GL_STATIC_DRAW);
+
+        glVertexAttribPointer(AMC_ATTRIBUTE_COLOR,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            0,
+            NULL);
+
+        glEnableVertexAttribArray(AMC_ATTRIBUTE_COLOR);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
         glBindVertexArray(0);
 
         // RECTANGLE
         const GLfloat frectangleVertices[] = {1.0f, 1.0f, 0.0f,
                 -1.0f, 1.0f, 0.0f,
                 -1.0f, -1.0f, 0.0f,
-                1.0f, -1.0f, 0.0f
+                1.0f, -1.0f, 0.0f};
+
+        const GLfloat frectangleColors[] = { 0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f
             };
 
         glGenVertexArrays(1, &vao_rectangle);
@@ -329,28 +380,46 @@ enum
 
         glGenBuffers(1, &vbo_rectangle_pos);
         glBindBuffer(GL_ARRAY_BUFFER, vbo_rectangle_pos);
-        glBufferData(
-                GL_ARRAY_BUFFER,
-                sizeof(frectangleVertices),
-                frectangleVertices,
-                GL_STATIC_DRAW
-            );
+        glBufferData(GL_ARRAY_BUFFER,
+            sizeof(frectangleVertices),
+            frectangleVertices,
+            GL_STATIC_DRAW);
 
         glVertexAttribPointer(
             AMC_ATTRIBUTE_POSITION,
+            3,									// how many co-ordinates in vertice
+            GL_FLOAT,							// type of above data
+            GL_FALSE,							// no normalization is desired
+            0,									// (dangha)
+            NULL								// offset to start in above attrib position
+        );
+
+        glEnableVertexAttribArray(AMC_ATTRIBUTE_POSITION);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        //
+        // working on colors of rectangle
+        //
+        glGenBuffers(1, &vbo_color_rectangle);
+        glBindBuffer(GL_ARRAY_BUFFER,
+        	vbo_color_rectangle);
+
+        glBufferData(GL_ARRAY_BUFFER,
+            sizeof(frectangleColors),
+            frectangleColors,
+            GL_STATIC_DRAW);
+
+        glVertexAttribPointer(AMC_ATTRIBUTE_COLOR,
             3,
             GL_FLOAT,
             GL_FALSE,
             0,
-            NULL
-        );
+            NULL);
 
-        glEnableVertexAttribArray(AMC_ATTRIBUTE_POSITION);
-
+        glEnableVertexAttribArray(AMC_ATTRIBUTE_COLOR);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
 
-        glUseProgram(0);
+        glBindVertexArray(0);
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
@@ -418,20 +487,22 @@ enum
 
     // initialize above matrices to identity
     vmath::mat4 modelViewMatrix = vmath::mat4::identity();
+    vmath::mat4 modelRotationMatrix = vmath::mat4::identity();
     vmath::mat4 modelViewProjectionMatrix = vmath::mat4::identity();
 
     modelViewMatrix = vmath::translate(-1.3f, 0.0f, -3.5f);
+    modelRotationMatrix = vmath::rotate(fangleTriangle, 0.0f, 1.0f, 0.0f);
+    modelViewMatrix = modelViewMatrix * modelRotationMatrix;
     modelViewProjectionMatrix = perspectiveProjectionMatrix * modelViewMatrix;
 
     // uniforms are given to m_uv_matrix (i.e. model view matrix)
     glUniformMatrix4fv(
             mvpUniform,
-            1,
-            GL_FALSE,
+            1,			//	how many matrices
+            GL_FALSE,	//	Transpose is needed ? ->
             modelViewProjectionMatrix
         );
 
-    // bind with vow (this is avoiding many necessary binding with vbo_triangle_poss)
     glBindVertexArray(vao_triangle);
 
     glDrawArrays(GL_TRIANGLES,  0,  3);
@@ -439,23 +510,45 @@ enum
 
     // Rectangle
     modelViewMatrix = vmath::mat4::identity();
+    modelRotationMatrix = vmath::mat4::identity();
     modelViewProjectionMatrix = vmath::mat4::identity();
 
     modelViewMatrix = vmath::translate(1.3f, 0.0f, -3.5f);
+    modelRotationMatrix = vmath::rotate(fangleTriangle, 1.0f, 0.0f, 0.0f);
+    //modelRotationMatrix = modelRotationMatrix * vmath::rotate(fangleTriangle, 0.0f, 1.0f, 0.0f);
+    //modelRotationMatrix = modelRotationMatrix * vmath::rotate(fangleTriangle, 0.0f, 1.0f, 0.0f);
+
+    modelViewMatrix = modelViewMatrix * modelRotationMatrix;
     modelViewProjectionMatrix = perspectiveProjectionMatrix * modelViewMatrix;
 
     // uniforms are given to m_uv_matrix (i.e. model view matrix)
     glUniformMatrix4fv(
             mvpUniform,
-            1,
-            GL_FALSE,
+            1,			//	how many matrices
+            GL_FALSE,	//	Transpose is needed ? ->
             modelViewProjectionMatrix
         );
 
-    // bind with vow (this is avoiding many necessary binding with vbo_triangle_poss)
     glBindVertexArray(vao_rectangle);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_FAN,
+                0,
+                4);
+
     glBindVertexArray(0);
+
+    glUseProgram(0);
+
+    fangleTriangle += 0.3f;
+    if (fangleTriangle > 360.0f)
+    {
+        fangleTriangle = 0.0f;
+    }
+
+    fangleRectangle += 0.3f;
+    if (fangleRectangle > 360.0f)
+    {
+        fangleRectangle = 0.0f;
+    }
 
     glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
     [eaglContext presentRenderbuffer:GL_RENDERBUFFER];

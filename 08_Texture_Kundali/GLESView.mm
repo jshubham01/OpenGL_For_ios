@@ -306,9 +306,9 @@ GLfloat fangleCube = 0.0f;
         texture_sampler_uniform = glGetUniformLocation(
             shaderProgramObject, "u_texture0_sampler");
 
-    pyramid_texture = [self loadTextureFromBMPFile:@"Stone.bmp" :@"bmp"];
+    pyramid_texture = [self loadTextureFromBMPFile:@"Stone" :@"bmp"];
 
-    cube_texture = [self loadTextureFromBMPFile:@"Vijay_Kundali.bmp" :@"bmp"];
+    cube_texture = [self loadTextureFromBMPFile:@"Vijay_Kundali" :@"bmp"];
 
         const GLfloat fpyramidVertices[] = {
                     0.0f, 1.0f, 0.0f,

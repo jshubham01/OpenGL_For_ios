@@ -10,6 +10,14 @@
 
 #import "vmath.h"
 
+enum
+{
+    AMC_ATTRIBUTE_POSITION = 0,
+    AMC_ATTRIBUTE_COLOR,
+    AMC_ATTRIBUTE_NORMAL,
+    AMC_ATTRIBUTE_TEXTURE0
+};
+
 @implementation GLESView
 {
     GLfloat fWidth;
@@ -159,10 +167,9 @@
                         szInfoLog
                     );
 
-                    fprintf(gpFile, "VERTEX SHADER FATAL ERROR: %s\n", szInfoLog);
+                    print("VERTEX SHADER FATAL ERROR: %s\n", szInfoLog);
                     free(szInfoLog);
                     [self release];
-                    [NSApp terminate:self];
                 }
             }
         }
@@ -218,10 +225,9 @@
                             szInfoLog
                         );
 
-                    fprintf(gpFile, ("FRAGMENT SHADER FATAL COMPILATION ERROR: %s\n"), szInfoLog);
+                    print( ("FRAGMENT SHADER FATAL COMPILATION ERROR: %s\n"), szInfoLog);
                     free(szInfoLog);
                     [self release];
-                    [NSApp terminate:self];
                 }
             }
         }
@@ -264,10 +270,9 @@
                     GLsizei written;
                     glGetProgramInfoLog(shaderProgramObject, iInfoLogLength,
                         &written, szInfoLog);
-                    fprintf(gpFile, "Shader Program Link Log: %s \n", szInfoLog);
+                    print("Shader Program Link Log: %s \n", szInfoLog);
                     free(szInfoLog);
                     [self release];
-                    [NSApp terminate:self];
                 }
             }
         }

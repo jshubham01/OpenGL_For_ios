@@ -287,9 +287,9 @@ enum
         );
 
 
-        const GLfloat ftriangleVertices[] = {0.0f, 50.0f, 0.0f,
-            -50.0f, -50.0f, 0.0f,
-            50.0f, -50.0f, 0.0f};
+        const GLfloat ftriangleVertices[] = {0.0f, 1.0f, 0.0f,
+                -1.0f, -1.0f, 0.0f,
+                1.0f, -1.0f, 0.0f};
 
 
         glGenVertexArrays(1, &vao);
@@ -413,6 +413,11 @@ enum
     glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
+
+    if(0 == height)
+    {
+        height = 1;
+    }
 
     glViewport(0, 0, width, height);
 

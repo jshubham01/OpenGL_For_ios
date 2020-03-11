@@ -350,8 +350,8 @@ GLfloat fangleCube = 0.0f;
         glGenVertexArrays(1, &vao_pyramid);
         glBindVertexArray(vao_pyramid);
 
-        glGenBuffers(1, &vbo_pyramid_pos);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_pyramid_pos);
+        glGenBuffers(1, &vbo_pyramid_position);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_pyramid_position);
         glBufferData(GL_ARRAY_BUFFER,
                 sizeof(fpyramidVertices),
                 fpyramidVertices,
@@ -398,7 +398,7 @@ GLfloat fangleCube = 0.0f;
         // Kundali Cube
         //
 
-        const GLfloat fcubeVertices[] = {
+        GLfloat fcubeVertices[] = {
                 1.0f, 1.0f, -1.0f,
                 -1.0f, 1.0f, -1.0f,
                 -1.0f, 1.0f, 1.0f,
@@ -481,8 +481,8 @@ GLfloat fangleCube = 0.0f;
         glGenVertexArrays(1, &vao_cube);
         glBindVertexArray(vao_cube);
 
-        glGenBuffers(1, &vbo_cube_pos);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_pos);
+        glGenBuffers(1, &vbo_cube_position);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_position);
         glBufferData(GL_ARRAY_BUFFER,
             sizeof(fcubeVertices),
             fcubeVertices,

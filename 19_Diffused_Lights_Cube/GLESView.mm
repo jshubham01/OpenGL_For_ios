@@ -137,7 +137,7 @@ enum
         const GLchar *vertexShaderSourceCode =
             "#version 300 es" \
             "\n" \
-            "in vec4 vPosition;" \
+            "in vec4 v_position;" \
             "in vec3 v_normals;" \
             "uniform mat4 u_model_view_mat;" \
             "uniform mat4 u_model_projection_mat;" \
@@ -148,13 +148,6 @@ enum
             "out vec3 diffused_color;" \
             "void main(void)" \
             "{" \
-            "if(ui_is_lighting_key_pressed == 1){" \
-                    "vec4 eye_coordinates = u_model_view_mat * v_position;" \
-                    "mat3 normal_matrix = mat3(transpose(inverse(u_model_view_mat)));" \
-                    "vec3 t_norm = normalize(normal_matrix * v_normals);" \
-                    "vec3 source = vec3(u_light_position - eye_coordinates);" \
-                    "diffused_color = u_ld *u_kd * dot(source, t_norm);" \
-                "}" \
                 "gl_Position = u_model_projection_mat * u_model_view_mat * v_position;" \
             "}";
 
@@ -213,17 +206,10 @@ enum
         "#version 300 es" \
         "\n" \
         "precision highp float;" \
-        "in vec3 diffused_color;" \
         "out vec4 v_frag_color;" \
-        "uniform int ui_is_lighting_key_pressed;" \
         "void main(void)" \
         "{" \
-            "if(ui_is_lighting_key_pressed == 1){ " \
-                "v_frag_color = vec4(diffused_color, 1.0);" \
-            "}" \
-            "else{" \
-                "v_frag_color = vec4(1.0, 1.0, 1.0, 1.0);" \
-            "}" \
+            "v_frag_color = vec4(1.0, 1.0, 1.0, 1.0);" \
         "}";
 
         // specify above code of shader to vertext shader object
@@ -279,7 +265,7 @@ enum
         // here we binded gpu`s variable to cpu`s index
         glBindAttribLocation(shaderProgramObject,
             AMC_ATTRIBUTE_POSITION,
-            "vPosition");
+            "v_position");
 
         glBindAttribLocation(shaderProgramObject,
             AMC_ATTRIBUTE_NORMAL,

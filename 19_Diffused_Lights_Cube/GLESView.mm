@@ -214,9 +214,14 @@ enum
         "\n" \
         "precision highp float;" \
         "out vec4 v_frag_color;" \
+        "uniform int ui_is_lighting_key_pressed;" \
         "void main(void)" \
         "{" \
-            "v_frag_color = vec4(1.0, 1.0, 1.0, 1.0);" \
+            "if(ui_is_lighting_key_pressed == 1){ " \
+                "v_frag_color = vec4(diffused_color, 1.0);" \
+            "}else{" \
+                "v_frag_color = vec4(1.0, 1.0, 1.0, 1.0);" \
+            "}" \
         "}";
 
         // specify above code of shader to vertext shader object

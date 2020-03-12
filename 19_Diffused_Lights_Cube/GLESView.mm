@@ -57,9 +57,10 @@ enum
 -(id)initWithFrame:(CGRect)frame
 {
     // code
+    self = [super initWithFrame:frame];
+
     fangleCube = 0.0f;
     boKeyOfLightsIsPressed = false;
-    self = [super initWithFrame:frame];
 
     if(self)
     {
@@ -213,13 +214,16 @@ enum
         "#version 300 es" \
         "\n" \
         "precision highp float;" \
+        "in vec3 diffused_color;" \
         "out vec4 v_frag_color;" \
         "uniform int ui_is_lighting_key_pressed;" \
         "void main(void)" \
         "{" \
-            "if(ui_is_lighting_key_pressed == 1){ " \
+            "if(ui_is_lighting_key_pressed == 1) " \
+            "{ " \
                 "v_frag_color = vec4(diffused_color, 1.0);" \
-            "}else{" \
+            "}" \
+            "else{" \
                 "v_frag_color = vec4(1.0, 1.0, 1.0, 1.0);" \
             "}" \
         "}";
@@ -317,15 +321,21 @@ enum
 
     uiModelViewUniform = glGetUniformLocation(shaderProgramObject, "u_model_view_mat" );
 
+
     uiProjectionUniform = glGetUniformLocation(shaderProgramObject, "u_model_projection_mat" );
 
+
     uiKeyOfLightsIsPressedUniform = glGetUniformLocation(shaderProgramObject, "ui_is_lighting_key_pressed");
+    printf("uiModelViewUniform %d", uiModelViewUniform);
 
     ldUniform = glGetUniformLocation(shaderProgramObject, "u_ld");
+    printf("ldUniform %d", ldUniform);
 
     kdUniform = glGetUniformLocation(shaderProgramObject, "u_kd");
+    printf("kdUniform %d", kdUniform);
 
     lightPositionVectorUniform = glGetUniformLocation(shaderProgramObject, "u_light_position");
+    printf("lightPositionVectorUniform %d", lightPositionVectorUniform);
 
     // CUBE
     const GLfloat fcubeVertices[] = {
@@ -430,9 +440,9 @@ enum
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
-        glEnable(GL_CULL_FACE);
+        // glEnable(GL_CULL_FACE);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        //glClearDepth(1.0f);
+        glClearDepthf(1.0f);
 
         // set projection  Matrix
         perspectiveProjectionMatrix = vmath::mat4::identity();
@@ -525,6 +535,7 @@ enum
         }
         else
         {
+            //print("Entering")
             glUniform1i(uiKeyOfLightsIsPressedUniform, 0);
         }
 

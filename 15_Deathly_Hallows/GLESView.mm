@@ -48,7 +48,7 @@ bool boFlagForSync = false;
     GLuint mvpUniform;
     GLuint colorUniform;
 
-    GLfloat fAngleCloak = 0.0f;
+    GLfloat fAngleCloak;
 
     vmath:: mat4 perspectiveProjectionMatrix;
 
@@ -63,6 +63,7 @@ bool boFlagForSync = false;
 -(id)initWithFrame:(CGRect)frame
 {
     // code
+    fAngleCloak = 0.0f;
     self = [super initWithFrame:frame];
 
     if(self)

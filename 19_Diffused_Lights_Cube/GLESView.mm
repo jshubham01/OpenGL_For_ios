@@ -214,6 +214,7 @@ enum
         "#version 300 es" \
         "\n" \
         "precision highp float;" \
+        "precision highp int" \
         "in vec3 diffused_color;" \
         "out vec4 v_frag_color;" \
         "uniform int ui_is_lighting_key_pressed;" \
@@ -321,21 +322,15 @@ enum
 
     uiModelViewUniform = glGetUniformLocation(shaderProgramObject, "u_model_view_mat" );
 
-
     uiProjectionUniform = glGetUniformLocation(shaderProgramObject, "u_model_projection_mat" );
 
-
     uiKeyOfLightsIsPressedUniform = glGetUniformLocation(shaderProgramObject, "ui_is_lighting_key_pressed");
-    printf("uiModelViewUniform %d", uiModelViewUniform);
 
     ldUniform = glGetUniformLocation(shaderProgramObject, "u_ld");
-    printf("ldUniform %d", ldUniform);
 
     kdUniform = glGetUniformLocation(shaderProgramObject, "u_kd");
-    printf("kdUniform %d", kdUniform);
 
     lightPositionVectorUniform = glGetUniformLocation(shaderProgramObject, "u_light_position");
-    printf("lightPositionVectorUniform %d", lightPositionVectorUniform);
 
     // CUBE
     const GLfloat fcubeVertices[] = {

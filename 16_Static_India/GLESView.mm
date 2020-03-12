@@ -507,14 +507,14 @@ const GLfloat fD_PositionArray[] = {
 
 	const GLfloat A_Position[] = {
 		//1.563 + 2 * fLetterWidth + (fLetterWidth / 2), Yoff, 0.0f,
-		1.163 + 2 * fLetterWidth + (fLetterWidth / 2), Yoff, 0.0f,
-		1.163 + 2 * fLetterWidth - (fLetterWidth / 2), Yoff, 0.0f,
-		1.163, fHeight, 0.0f,
-		1.163 + fLetterWidth, fHeight, 0.0f,
-		1.163 + 4 * fLetterWidth, fHeight, 0.0f,
-		1.163 + 2 * fLetterWidth + (fLetterWidth / 2), Yoff, 0.0f,
-		1.163 + 2 * fLetterWidth - (fLetterWidth / 2), Yoff, 0.0f,
-		1.163 + 3 * fLetterWidth, fHeight, 0.0f
+		1.163f + 2 * fLetterWidth + (fLetterWidth / 2), Yoff, 0.0f,
+		1.163f + 2 * fLetterWidth - (fLetterWidth / 2), Yoff, 0.0f,
+		1.163f, fHeight, 0.0f,
+		1.163f + fLetterWidth, fHeight, 0.0f,
+		1.163f + 4 * fLetterWidth, fHeight, 0.0f,
+		1.163f + 2 * fLetterWidth + (fLetterWidth / 2), Yoff, 0.0f,
+		1.163f + 2 * fLetterWidth - (fLetterWidth / 2), Yoff, 0.0f,
+		1.163f + 3 * fLetterWidth, fHeight, 0.0f
 	};
 
 	const GLfloat A_Color[] = {SAFFRON, SAFFRON, GREEN, GREEN,

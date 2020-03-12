@@ -1,8 +1,6 @@
 //
 //  Created by shubham_at_astromedicomp on 12/21/19.
-//  Diffused Lights
-//  Cube
-//  Diffused Light
+//  Perspetive Triangle
 //
 
 #import <OpenGLES/ES3/gl.h>
@@ -49,17 +47,18 @@ enum
     bool boKeyOfLightsIsPressed;
     GLfloat fangleCube;
 
+    GLint width;
+    GLint height;
     id displayLink;
     NSInteger animationFrameInterval;
     BOOL isAnimating;
-
-    GLint width;
-    GLint height;
 }
 
 -(id)initWithFrame:(CGRect)frame
 {
     // code
+    fangleCube = 0.0f;
+    boKeyOfLightsIsPressed = false;
     self = [super initWithFrame:frame];
 
     if(self)
@@ -138,26 +137,26 @@ enum
         const GLchar *vertexShaderSourceCode =
             "#version 300 es" \
             "\n" \
-        "in vec4 v_position;" \
-        "in vec3 v_normals;" \
-        "uniform mat4 u_model_view_mat;" \
-        "uniform mat4 u_model_projection_mat;" \
-        "uniform int ui_is_lighting_key_pressed;" \
-        "uniform vec3 u_ld;" \
-        "uniform vec3 u_kd;" \
-        "uniform vec4 u_light_position;" \
-        "out vec3 diffused_color;" \
-        "void main(void)" \
-        "{" \
-        "if(ui_is_lighting_key_pressed == 1){" \
-                "vec4 eye_coordinates = u_model_view_mat * v_position;" \
-                "mat3 normal_matrix = mat3(transpose(inverse(u_model_view_mat)));" \
-                "vec3 t_norm = normalize(normal_matrix * v_normals);" \
-                "vec3 source = vec3(u_light_position - eye_coordinates);" \
-                "diffused_color = u_ld *u_kd * dot(source, t_norm);" \
-            "}" \
-            "gl_Position = u_model_projection_mat * u_model_view_mat * v_position;" \
-        "}";
+            "in vec4 vPosition;" \
+            "in vec3 v_normals;" \
+            "uniform mat4 u_model_view_mat;" \
+            "uniform mat4 u_model_projection_mat;" \
+            "uniform int ui_is_lighting_key_pressed;" \
+            "uniform vec3 u_ld;" \
+            "uniform vec3 u_kd;" \
+            "uniform vec4 u_light_position;" \
+            "out vec3 diffused_color;" \
+            "void main(void)" \
+            "{" \
+            "if(ui_is_lighting_key_pressed == 1){" \
+                    "vec4 eye_coordinates = u_model_view_mat * v_position;" \
+                    "mat3 normal_matrix = mat3(transpose(inverse(u_model_view_mat)));" \
+                    "vec3 t_norm = normalize(normal_matrix * v_normals);" \
+                    "vec3 source = vec3(u_light_position - eye_coordinates);" \
+                    "diffused_color = u_ld *u_kd * dot(source, t_norm);" \
+                "}" \
+                "gl_Position = u_model_projection_mat * u_model_view_mat * v_position;" \
+            "}";
 
         // specify above code of shader to vertext shader object
         glShaderSource(vertexShaderObject,
@@ -280,54 +279,56 @@ enum
         // here we binded gpu`s variable to cpu`s index
         glBindAttribLocation(shaderProgramObject,
             AMC_ATTRIBUTE_POSITION,
-            "v_position");
+            "vPosition");
 
         glBindAttribLocation(shaderProgramObject,
             AMC_ATTRIBUTE_NORMAL,
             "v_normals");
 
+
         // link the shader
         glLinkProgram(shaderProgramObject);
 
-        GLint iShaderProgramLinkStatus = 0;
-        iInfoLogLength = 0;
-        
-        glGetProgramiv(shaderProgramObject,
-            GL_LINK_STATUS,
-            &iShaderProgramLinkStatus);
+    GLint iShaderProgramLinkStatus = 0;
+    iInfoLogLength = 0;
+    
+    glGetProgramiv(shaderProgramObject,
+        GL_LINK_STATUS,
+        &iShaderProgramLinkStatus);
 
-        if(GL_FALSE == iShaderProgramLinkStatus)
+    if(GL_FALSE == iShaderProgramLinkStatus)
+    {
+        glGetProgramiv(shaderProgramObject, GL_LINK_STATUS,
+            &iInfoLogLength);
+
+        if(iInfoLogLength > 0)
         {
-            glGetProgramiv(shaderProgramObject, GL_LINK_STATUS,
-                &iInfoLogLength);
-
-            if(iInfoLogLength > 0)
+            szInfoLog = NULL;
+            szInfoLog = (char *)malloc(iInfoLogLength);
+            if(NULL != szInfoLog)
             {
-                szInfoLog = NULL;
-                szInfoLog = (char *)malloc(iInfoLogLength);
-                if(NULL != szInfoLog)
-                {
-                    GLsizei written;
-                    glGetProgramInfoLog(shaderProgramObject, iInfoLogLength,
-                        &written, szInfoLog);
-                    printf("Shader Program Link Log: %s \n", szInfoLog);
-                    free(szInfoLog);
-                    [self release];
-                }
+                GLsizei written;
+                glGetProgramInfoLog(shaderProgramObject, iInfoLogLength,
+                    &written, szInfoLog);
+                fprintf(gpFile, "Shader Program Link Log: %s \n", szInfoLog);
+                free(szInfoLog);
+                [self release];
+                [NSApp terminate:self];
             }
         }
+    }
 
-        uiModelViewUniform = glGetUniformLocation(shaderProgramObject, "u_model_view_mat" );
+    uiModelViewUniform = glGetUniformLocation(shaderProgramObject, "u_model_view_mat" );
 
-        uiProjectionUniform = glGetUniformLocation(shaderProgramObject, "u_model_projection_mat" );
+    uiProjectionUniform = glGetUniformLocation(shaderProgramObject, "u_model_projection_mat" );
 
-        uiKeyOfLightsIsPressedUniform = glGetUniformLocation(shaderProgramObject, "ui_is_lighting_key_pressed");
+    uiKeyOfLightsIsPressedUniform = glGetUniformLocation(shaderProgramObject, "ui_is_lighting_key_pressed");
 
-        ldUniform = glGetUniformLocation(shaderProgramObject, "u_ld");
+    ldUniform = glGetUniformLocation(shaderProgramObject, "u_ld");
 
-        kdUniform = glGetUniformLocation(shaderProgramObject, "u_kd");
+    kdUniform = glGetUniformLocation(shaderProgramObject, "u_kd");
 
-        lightPositionVectorUniform = glGetUniformLocation(shaderProgramObject, "u_light_position");
+    lightPositionVectorUniform = glGetUniformLocation(shaderProgramObject, "u_light_position");
 
     // CUBE
     const GLfloat fcubeVertices[] = {
@@ -430,7 +431,6 @@ enum
 
     glBindVertexArray(0);
 
-
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
         glEnable(GL_CULL_FACE);
@@ -481,7 +481,6 @@ enum
     return(self);
 }
 
-
 +(Class)layerClass
 {
     // code
@@ -490,63 +489,63 @@ enum
 
 -(void)drawView:(id)sender
 {
-    [EAGLContext setCurrentContext:eaglContext];
+        [EAGLContext setCurrentContext:eaglContext];
 
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    glUseProgram(shaderProgramObject);
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        glUseProgram(shaderProgramObject);
 
-    // Cube
-    // initialize above matrices to identity
-    vmath::mat4 modelViewMatrix = vmath::mat4::identity();
-    vmath::mat4 modelRotationMatrix = vmath::mat4::identity();
-    vmath::mat4 modelViewProjectionMatrix = vmath::mat4::identity();
 
-    modelViewMatrix = vmath::translate(0.0f, 0.0f, -5.5f);
-    modelRotationMatrix = vmath::rotate(fangleCube, 0.0f, 1.0f, 0.0f);
+        // Cube
+        // initialize above matrices to identity
+        vmath::mat4 modelViewMatrix = vmath::mat4::identity();
+        vmath::mat4 modelRotationMatrix = vmath::mat4::identity();
+        vmath::mat4 modelViewProjectionMatrix = vmath::mat4::identity();
 
-    modelViewMatrix = modelViewMatrix * modelRotationMatrix;
+        modelViewMatrix = vmath::translate(0.0f, 0.0f, -5.5f);
+        modelRotationMatrix = vmath::rotate(fangleCube, 0.0f, 1.0f, 0.0f);
 
-    modelViewProjectionMatrix = perspectiveProjectionMatrix * modelViewMatrix;
+        modelViewMatrix = modelViewMatrix * modelRotationMatrix;
 
-    glUniformMatrix4fv(uiModelViewUniform,
-        1,
-        GL_FALSE, 
-        modelViewMatrix);
+        modelViewProjectionMatrix = perspectiveProjectionMatrix * modelViewMatrix;
 
-    glUniformMatrix4fv(uiProjectionUniform,
-        1,
-        GL_FALSE,
-        perspectiveProjectionMatrix);
+        glUniformMatrix4fv(uiModelViewUniform,
+            1,
+            GL_FALSE, 
+            modelViewMatrix);
 
-    if(true == boKeyOfLightsIsPressed)
-    {
-        glUniform1i(uiKeyOfLightsIsPressedUniform, 1);
-        glUniform3f(ldUniform, 1.0, 1.0, 1.0);
-        glUniform3f(kdUniform, 0.5, 0.5, 0.5);
-        glUniform4f(lightPositionVectorUniform, 0.0f, 0.0f, 2.0f, 1.0f);
-    }
-    else
-    {
-        glUniform1i(uiKeyOfLightsIsPressedUniform, 0);
-    }
+        glUniformMatrix4fv(uiProjectionUniform,
+            1,
+            GL_FALSE,
+            perspectiveProjectionMatrix);
 
-    glBindVertexArray(vao_cube);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-    glDrawArrays(GL_TRIANGLE_FAN, 4, 4);
-    glDrawArrays(GL_TRIANGLE_FAN, 8, 4);
-    glDrawArrays(GL_TRIANGLE_FAN, 12, 4);
-    glDrawArrays(GL_TRIANGLE_FAN, 16, 4);
-    glDrawArrays(GL_TRIANGLE_FAN, 20, 4);
-    glBindVertexArray(0);
+        if(true == boKeyOfLightsIsPressed)
+        {
+            glUniform1i(uiKeyOfLightsIsPressedUniform, 1);
+            glUniform3f(ldUniform, 1.0, 1.0, 1.0);
+            glUniform3f(kdUniform, 0.5, 0.5, 0.5);
+            glUniform4f(lightPositionVectorUniform, 0.0f, 0.0f, 2.0f, 1.0f);
+        }
+        else
+        {
+            glUniform1i(uiKeyOfLightsIsPressedUniform, 0);
+        }
 
-    glUseProgram(0);
+        glBindVertexArray(vao_cube);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        glDrawArrays(GL_TRIANGLE_FAN, 4, 4);
+        glDrawArrays(GL_TRIANGLE_FAN, 8, 4);
+        glDrawArrays(GL_TRIANGLE_FAN, 12, 4);
+        glDrawArrays(GL_TRIANGLE_FAN, 16, 4);
+        glDrawArrays(GL_TRIANGLE_FAN, 20, 4);
+        glBindVertexArray(0);
+        glUseProgram(0);
 
-    fangleCube += 0.3f;
-    if (fangleCube > 360.0f)
-    {
-        fangleCube = 0.0f;
-    }
+        fangleCube += 0.3f;
+        if (fangleCube > 360.0f)
+        {
+            fangleCube = 0.0f;
+        }
 
     glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
     [eaglContext presentRenderbuffer:GL_RENDERBUFFER];
@@ -631,6 +630,7 @@ enum
 
 - (void)onSingleTap:(UITapGestureRecognizer *)gr
 {
+    // code
     if (true == boKeyOfLightsIsPressed)
     {
         boKeyOfLightsIsPressed = false;
@@ -640,7 +640,6 @@ enum
         boKeyOfLightsIsPressed = true;
     }
 
-    break;
 }
 
 - (void)onDoubleTap:(UITapGestureRecognizer *)gr

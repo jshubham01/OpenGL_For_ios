@@ -299,7 +299,7 @@ enum
 
         int slices = 50;
         int stacks = 50;
-        [self mySphereWithRadius:1.6 slices:slices stacks:stacks];
+        [self mySphereWithRadius:1.0 slices:slices stacks:stacks];
         //mySphereWithRadius(0.6f, slices, stacks);
         int vertexCount = (slices + 1) * (stacks + 1);
 
@@ -491,7 +491,7 @@ enum
     modelViewMatrix = modelViewMatrix *  vmath::translate(2.0f, 0.0f, 0.0f);
     modelRotationMatrix = vmath::rotate(g_iElbow, 0.0f, 0.0f, 1.0f);
     modelViewMatrix = modelViewMatrix * modelRotationMatrix;
-    modelViewMatrix = modelViewMatrix *  vmath::translate(1.0f, 0.0f, 0.0f);
+    modelViewMatrix = modelViewMatrix *  vmath::translate(2.0f, 0.0f, 0.0f);
 
     modelViewMatrix_1 = modelViewMatrix * scaleMatrix;
     modelViewProjectionMatrix = perspectiveProjectionMatrix * modelViewMatrix_1;

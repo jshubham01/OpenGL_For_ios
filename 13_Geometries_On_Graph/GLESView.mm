@@ -604,10 +604,7 @@ enum
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     glUseProgram(shaderProgramObject);
 
-
-    modelViewProjectionMatrix = perspectiveProjectionMatrix * modelViewMatrix;
-    glUniformMatrix4fv(mvpUniform, 1, GL_FALSE, modelViewProjectionMatrix);
-
+    // initialize above matrices to identity
     vmath::mat4 modelViewMatrix = vmath::mat4::identity();
     vmath::mat4 modelViewProjectionMatrix = vmath::mat4::identity();
 

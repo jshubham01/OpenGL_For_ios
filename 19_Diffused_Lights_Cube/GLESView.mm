@@ -310,10 +310,9 @@ enum
                 GLsizei written;
                 glGetProgramInfoLog(shaderProgramObject, iInfoLogLength,
                     &written, szInfoLog);
-                fprintf(gpFile, "Shader Program Link Log: %s \n", szInfoLog);
+                printf("Shader Program Link Log: %s \n", szInfoLog);
                 free(szInfoLog);
                 [self release];
-                [NSApp terminate:self];
             }
         }
     }

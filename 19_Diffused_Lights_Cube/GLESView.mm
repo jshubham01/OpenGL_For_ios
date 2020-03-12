@@ -148,6 +148,13 @@ enum
             "out vec3 diffused_color;" \
             "void main(void)" \
             "{" \
+                "if(ui_is_lighting_key_pressed == 1){" \
+                "vec4 eye_coordinates = u_model_view_mat * v_position;" \
+                "mat3 normal_matrix = mat3(transpose(inverse(u_model_view_mat)));" \
+                "vec3 t_norm = normalize(normal_matrix * v_normals);" \
+                "vec3 source = vec3(u_light_position - eye_coordinates);" \
+                "diffused_color = u_ld *u_kd * dot(source, t_norm);" \
+            "}" \
                 "gl_Position = u_model_projection_mat * u_model_view_mat * v_position;" \
             "}";
 

@@ -1,6 +1,6 @@
 //
-//  Created by shubham_at_astromedicomp
-//  Robotic Arm
+//  Created by shubham_at_astromedicomp on 12/21/19.
+//  Perspetive Triangle
 //
 
 #import <OpenGLES/ES3/gl.h>
@@ -40,10 +40,7 @@ enum
     float   *fSphereNormals;
     float   *fSphereTexturesCoords;
     int     *indices;
-    int gNumElements;
-
-    float g_iElbow;
-    float g_iShoulder;
+    int     gNumElements;
 
     vmath:: mat4 perspectiveProjectionMatrix;
 
@@ -53,6 +50,9 @@ enum
 
     GLint width;
     GLint height;
+
+    float g_iElbow;
+    float g_iShoulder;
 }
 
 -(id)initWithFrame:(CGRect)frame
@@ -299,7 +299,7 @@ enum
 
         int slices = 50;
         int stacks = 50;
-        [self mySphereWithRadius:1.0 slices:slices stacks:stacks];
+        [self mySphereWithRadius:1.6 slices:slices stacks:stacks];
         //mySphereWithRadius(0.6f, slices, stacks);
         int vertexCount = (slices + 1) * (stacks + 1);
 
@@ -324,7 +324,13 @@ enum
                 NULL	
             );
 
+        glEnableVertexAttribArray(AMC_ATTRIBUTE_POSITION);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+        glGenBuffers(1, &vbo_sphere_elements);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, gNumElements * sizeof(int), indices, GL_STATIC_DRAW);
+        glBindVertexArray(0);
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
@@ -432,6 +438,7 @@ enum
 
 }
 
+
 +(Class)layerClass
 {
     // code
@@ -446,6 +453,7 @@ enum
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     glUseProgram(shaderProgramObject);
 
+    // initialize above matrices to identity
     vmath::mat4 modelRotationMatrix = vmath::mat4::identity();
     vmath::mat4 scaleMatrix = vmath::mat4::identity();
     vmath::mat4 modelViewMatrix = vmath::mat4::identity();
@@ -579,16 +587,14 @@ enum
 
 - (void)onSingleTap:(UITapGestureRecognizer *)gr
 {
-    g_iShoulder = (int) (g_iShoulder + 3) % 360;
     // code
-    // [self setNeedsDisplay]; // repainting
+    g_iShoulder = (int) (g_iShoulder + 3) % 360;
 }
 
 - (void)onDoubleTap:(UITapGestureRecognizer *)gr
 {
-    g_iShoulder = (int)(g_iShoulder - 3) % 360;
     // code
-    // [self setNeedsDisplay]; // repainting
+    g_iShoulder = (int)(g_iShoulder - 3) % 360;
 }
 
 - (void)onSwipe:(UISwipeGestureRecognizer *)gr
@@ -606,6 +612,7 @@ enum
 
 - (void)dealloc
 {
+
     free(fSpherePositions);
     fSpherePositions = NULL;
     free(fSphereNormals);

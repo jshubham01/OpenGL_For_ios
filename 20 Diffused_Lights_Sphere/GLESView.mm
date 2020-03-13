@@ -1,6 +1,5 @@
 //
-//  Created by shubham_at_astromedicomp on 12/21/19.
-//  Perspetive Triangle
+// Created by shubham_at_astromedicomp on 12/21/19.
 //
 
 #import <OpenGLES/ES3/gl.h>
@@ -30,35 +29,37 @@ enum
     GLuint fragmentShaderObject;
     GLuint shaderProgramObject;
 
-    GLuint vao_sphere;
-    GLuint vbo_sphere_position;
-    GLuint vbo_sphere_elements;
-    GLuint vbo_sphere_normals;
+    GLuint vao_cube;
+    GLuint vbo_position_cube;
+    GLuint vbo_normals_cube;
 
     GLuint uiModelViewUniform;
     GLuint uiProjectionUniform;
+    GLuint ldUniform;
+    GLuint kdUniform;
 
-    float   *fSpherePositions;
-    float   *fSphereNormals;
-    float   *fSphereTexturesCoords;
-    int     *indices;
-    int     gNumElements;
+    GLuint lightPositionVectorUniform;
+    GLuint uiKeyOfLightsIsPressedUniform;
 
     vmath:: mat4 perspectiveProjectionMatrix;
-    float fAngleRotate;
 
-    id displayLink;
-    NSInteger animationFrameInterval;
-    BOOL isAnimating;
+    bool boKeyOfLightsIsPressed;
+    GLfloat fangleCube;
 
     GLint width;
     GLint height;
+    id displayLink;
+    NSInteger animationFrameInterval;
+    BOOL isAnimating;
 }
 
 -(id)initWithFrame:(CGRect)frame
 {
     // code
     self = [super initWithFrame:frame];
+
+    fangleCube = 0.0f;
+    boKeyOfLightsIsPressed = false;
 
     if(self)
     {
@@ -136,11 +137,25 @@ enum
         const GLchar *vertexShaderSourceCode =
             "#version 300 es" \
             "\n" \
-            "in vec4 vPosition;" \
-            "uniform mat4 u_mvp_matrix;" \
+            "in vec4 v_position;" \
+            "in vec3 v_normals;" \
+            "uniform mat4 u_model_view_mat;" \
+            "uniform mat4 u_model_projection_mat;" \
+            "uniform int ui_is_lighting_key_pressed;" \
+            "uniform vec3 u_ld;" \
+            "uniform vec3 u_kd;" \
+            "uniform vec4 u_light_position;" \
+            "out vec3 diffused_color;" \
             "void main(void)" \
             "{" \
-            "gl_Position = u_mvp_matrix * vPosition;" \
+                "if(ui_is_lighting_key_pressed == 1){" \
+                "vec4 eye_coordinates = u_model_view_mat * v_position;" \
+                "mat3 normal_matrix = mat3(transpose(inverse(u_model_view_mat)));" \
+                "vec3 t_norm = normalize(normal_matrix * v_normals);" \
+                "vec3 source = vec3(u_light_position - eye_coordinates);" \
+                "diffused_color = u_ld *u_kd * dot(source, t_norm);" \
+            "}" \
+                "gl_Position = u_model_projection_mat * u_model_view_mat * v_position;" \
             "}";
 
         // specify above code of shader to vertext shader object
@@ -198,10 +213,19 @@ enum
         "#version 300 es" \
         "\n" \
         "precision highp float;" \
-        "out vec4 vFragColor;" \
+        "precision highp int" \
+        "in vec3 diffused_color;" \
+        "out vec4 v_frag_color;" \
+        "uniform int ui_is_lighting_key_pressed;" \
         "void main(void)" \
         "{" \
-        "vFragColor = vec4(1.0, 1.0, 1.0, 1.0);" \
+            "if(ui_is_lighting_key_pressed == 1) " \
+            "{ " \
+                "v_frag_color = vec4(diffused_color, 1.0);" \
+            "}" \
+            "else{" \
+                "v_frag_color = vec4(1.0, 1.0, 1.0, 1.0);" \
+            "}" \
         "}";
 
         // specify above code of shader to vertext shader object
@@ -257,86 +281,162 @@ enum
         // here we binded gpu`s variable to cpu`s index
         glBindAttribLocation(shaderProgramObject,
             AMC_ATTRIBUTE_POSITION,
-            "vPosition");
+            "v_position");
+
+        glBindAttribLocation(shaderProgramObject,
+            AMC_ATTRIBUTE_NORMAL,
+            "v_normals");
+
 
         // link the shader
         glLinkProgram(shaderProgramObject);
 
-        GLint iShaderProgramLinkStatus = 0;
-        iInfoLogLength = 0;
-        
-        glGetProgramiv(shaderProgramObject,
-            GL_LINK_STATUS,
-            &iShaderProgramLinkStatus);
+    GLint iShaderProgramLinkStatus = 0;
+    iInfoLogLength = 0;
+    
+    glGetProgramiv(shaderProgramObject,
+        GL_LINK_STATUS,
+        &iShaderProgramLinkStatus);
 
-        if(GL_FALSE == iShaderProgramLinkStatus)
+    if(GL_FALSE == iShaderProgramLinkStatus)
+    {
+        glGetProgramiv(shaderProgramObject, GL_LINK_STATUS,
+            &iInfoLogLength);
+
+        if(iInfoLogLength > 0)
         {
-            glGetProgramiv(shaderProgramObject, GL_LINK_STATUS,
-                &iInfoLogLength);
-
-            if(iInfoLogLength > 0)
+            szInfoLog = NULL;
+            szInfoLog = (char *)malloc(iInfoLogLength);
+            if(NULL != szInfoLog)
             {
-                szInfoLog = NULL;
-                szInfoLog = (char *)malloc(iInfoLogLength);
-                if(NULL != szInfoLog)
-                {
-                    GLsizei written;
-                    glGetProgramInfoLog(shaderProgramObject, iInfoLogLength,
-                        &written, szInfoLog);
-                    printf("Shader Program Link Log: %s \n", szInfoLog);
-                    free(szInfoLog);
-                    [self release];
-                }
+                GLsizei written;
+                glGetProgramInfoLog(shaderProgramObject, iInfoLogLength,
+                    &written, szInfoLog);
+                printf("Shader Program Link Log: %s \n", szInfoLog);
+                free(szInfoLog);
+                [self release];
             }
         }
+    }
 
-        // now this is rule: attribute binding should happen before linking program and
-        // uniforms binding should happen after linking
-        mvpUniform = glGetUniformLocation(
-            shaderProgramObject,
-            "u_mvp_matrix"
-        );
+    uiModelViewUniform = glGetUniformLocation(shaderProgramObject, "u_model_view_mat" );
 
-        int slices = 50;
-        int stacks = 50;
-        [self mySphereWithRadius:1.6 slices:slices stacks:stacks];
-        //mySphereWithRadius(0.6f, slices, stacks);
-        int vertexCount = (slices + 1) * (stacks + 1);
+    uiProjectionUniform = glGetUniformLocation(shaderProgramObject, "u_model_projection_mat" );
 
-        glGenVertexArrays(1, &vao_sphere);
-        glBindVertexArray(vao_sphere);
+    uiKeyOfLightsIsPressedUniform = glGetUniformLocation(shaderProgramObject, "ui_is_lighting_key_pressed");
 
-        glGenBuffers(1, &vbo_sphere_position);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_sphere_position);
-        glBufferData(
-                        GL_ARRAY_BUFFER,
-                        3 * vertexCount * sizeof(float),
-                        fSpherePositions,
-                        GL_STATIC_DRAW
-                    );
+    ldUniform = glGetUniformLocation(shaderProgramObject, "u_ld");
 
-        glVertexAttribPointer(
-                AMC_ATTRIBUTE_POSITION,
-                3,		
-                GL_FLOAT,
-                GL_FALSE,
-                0,		
-                NULL	
-            );
+    kdUniform = glGetUniformLocation(shaderProgramObject, "u_kd");
 
-        glEnableVertexAttribArray(AMC_ATTRIBUTE_POSITION);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    lightPositionVectorUniform = glGetUniformLocation(shaderProgramObject, "u_light_position");
 
-        glGenBuffers(1, &vbo_sphere_elements);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, gNumElements * sizeof(int), indices, GL_STATIC_DRAW);
-        glBindVertexArray(0);
+    // CUBE
+    const GLfloat fcubeVertices[] = {
+			1.0f, 1.0f, -1.0f,
+			-1.0f, 1.0f, -1.0f,
+			-1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f,
+
+			1.0f, -1.0f, -1.0f ,
+			-1.0f, -1.0f, -1.0f,
+			-1.0f, -1.0f, 1.0f,
+			1.0f, -1.0f, 1.0f,
+
+			1.0f, 1.0f, 1.0f,
+			-1.0f, 1.0f, 1.0f,
+			-1.0f, -1.0f, 1.0f,
+			1.0f, -1.0f, 1.0f,
+
+			1.0f, 1.0f, -1.0f,
+			-1.0f, 1.0f, -1.0f,
+			-1.0f, -1.0f, -1.0f,
+			1.0f, -1.0f, -1.0f,
+
+			1.0f, 1.0f, -1.0f,
+			1.0f, 1.0f, 1.0f,
+			1.0f, -1.0f, 1.0f,
+			1.0f, -1.0f, -1.0f,
+
+			-1.0f, 1.0f, -1.0f,
+			-1.0f, 1.0f, 1.0f,
+			-1.0f, -1.0f, 1.0f,
+			-1.0f, -1.0f, -1.0f
+        };
+
+    const GLfloat fCubeNormals[] = 
+    {
+            0.0f, 1.0f, 0.0f,
+            0.0f, 1.0f, 0.0f,
+            0.0f, 1.0f, 0.0f,
+            0.0f, 1.0f, 0.0f,
+
+            0.0f, -1.0f, 0.0f,
+            0.0f, -1.0f, 0.0f,
+            0.0f, -1.0f, 0.0f,
+            0.0f, -1.0f, 0.0f,
+
+            0.0f, 0.0f, 1.0f,
+            0.0f, 0.0f, 1.0f,
+            0.0f, 0.0f, 1.0f,
+            0.0f, 0.0f, 1.0f,
+
+            0.0f, 0.0f, -1.0f,
+            0.0f, 0.0f, -1.0f,
+            0.0f, 0.0f, -1.0f,
+            0.0f, 0.0f, -1.0f,
+
+            1.0f, 0.0f, 0.0f,
+            1.0f, 0.0f, 0.0f,
+            1.0f, 0.0f, 0.0f,
+            1.0f, 0.0f, 0.0f,
+
+            -1.0f, 0.0f, 0.0f,
+            -1.0f, 0.0f, 0.0f,
+            -1.0f, 0.0f, 0.0f,
+            -1.0f, 0.0f, 0.0f
+       };
+
+    glGenVertexArrays(1, &vao_cube);
+    glBindVertexArray(vao_cube);
+
+    glGenBuffers(1, &vbo_position_cube);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_position_cube);
+    glBufferData(GL_ARRAY_BUFFER,
+        sizeof(fcubeVertices),
+        fcubeVertices,
+        GL_STATIC_DRAW);
+
+    glVertexAttribPointer(
+        AMC_ATTRIBUTE_POSITION,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        0,
+        NULL
+    );
+
+    glEnableVertexAttribArray(AMC_ATTRIBUTE_POSITION);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    //
+    // working on normals Cube
+    //
+    glGenBuffers(1, &vbo_normals_cube);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_normals_cube);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(fCubeNormals), fCubeNormals, GL_STATIC_DRAW);
+    glVertexAttribPointer(AMC_ATTRIBUTE_NORMAL, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    glEnableVertexAttribArray(AMC_ATTRIBUTE_NORMAL);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glBindVertexArray(0);
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
-        glEnable(GL_CULL_FACE);
+        // glEnable(GL_CULL_FACE);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        //glClearDepth(1.0f);
+        glClearDepthf(1.0f);
 
         // set projection  Matrix
         perspectiveProjectionMatrix = vmath::mat4::identity();
@@ -382,63 +482,6 @@ enum
     return(self);
 }
 
--(void)mySphereWithRadius:(float)radius slices:(int)slices stacks:(int)stacks
-{
-    int vertexCount = (slices + 1)*(stacks + 1);
-    gNumElements = 2 * slices*stacks * 3;
-
-    fSpherePositions = (float *)malloc(3 * vertexCount * sizeof(float));
-    fSphereNormals = (float *)malloc(3 * vertexCount * sizeof(float));
-    fSphereTexturesCoords = (float *)malloc(2 * vertexCount * sizeof(float));
-    indices = (int *)malloc(gNumElements * sizeof(int));
-
-    float du = 2 * M_PI / slices;
-    float dv = M_PI / stacks;
-
-    int indexV = 0;
-    int indexT = 0;
-
-    float u, v, x, y, z;
-    int i, j, k;
-    for (i = 0; i <= stacks; i++)
-    {
-        v = -M_PI / 2 + i * dv;
-        for (j = 0; j <= slices; j++)
-        {
-            u = j * du;
-            x = cos(u) * cos(v);
-            y = sin(u) * cos(v);
-            z = sin(v);
-            fSpherePositions[indexV] = radius * x;
-            fSphereNormals[indexV++] = x;
-            fSpherePositions[indexV] = radius * y;
-            fSphereNormals[indexV++] = y;
-            fSpherePositions[indexV] = radius * z;
-            fSphereNormals[indexV++] = z;
-            fSphereTexturesCoords[indexT++] = j / slices;
-            fSphereTexturesCoords[indexT++] = i / stacks;
-        }
-    }
-
-    k = 0;
-    for (j = 0; j < stacks; j++)
-    {
-        int row1 = j * (slices + 1);
-        int row2 = (j + 1)*(slices + 1);
-        for (i = 0; i < slices; i++)
-        {
-            indices[k++] = row1 + i;
-            indices[k++] = row2 + i + 1;
-            indices[k++] = row2 + i;
-            indices[k++] = row1 + i;
-            indices[k++] = row1 + i + 1;
-            indices[k++] = row2 + i + 1;
-        }
-    }
-
-}
-
-
 +(Class)layerClass
 {
     // code
@@ -447,31 +490,64 @@ enum
 
 -(void)drawView:(id)sender
 {
-    [EAGLContext setCurrentContext:eaglContext];
+        [EAGLContext setCurrentContext:eaglContext];
 
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    glUseProgram(shaderProgramObject);
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        glUseProgram(shaderProgramObject);
 
-    // initialize above matrices to identity
-    vmath::mat4 modelViewMatrix = vmath::mat4::identity();
-    vmath::mat4 rotateMatrix = vmath::mat4::identity();
-    vmath::mat4 modelViewProjectionMatrix = vmath::mat4::identity();
 
-    rotateMatrix = vmath::rotate(90.0f, 1.0f, 0.0f, 0.0f);
-    modelViewMatrix = vmath::translate(0.0f, 0.0f, -5.0f);
-    modelViewMatrix = modelViewMatrix * rotateMatrix;
-    modelViewProjectionMatrix = perspectiveProjectionMatrix * modelViewMatrix;
+        // Cube
+        // initialize above matrices to identity
+        vmath::mat4 modelViewMatrix = vmath::mat4::identity();
+        vmath::mat4 modelRotationMatrix = vmath::mat4::identity();
+        vmath::mat4 modelViewProjectionMatrix = vmath::mat4::identity();
 
-    // uniforms are given to m_uv_matrix (i.e. model view matrix)
-    glUniformMatrix4fv(mvpUniform, 1, GL_FALSE, modelViewProjectionMatrix);
+        modelViewMatrix = vmath::translate(0.0f, 0.0f, -5.5f);
+        modelRotationMatrix = vmath::rotate(fangleCube, 0.0f, 1.0f, 0.0f);
 
-    glBindVertexArray(vao_sphere);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
-    glDrawElements(GL_LINES, gNumElements, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
+        modelViewMatrix = modelViewMatrix * modelRotationMatrix;
 
-    glUseProgram(0);
+        modelViewProjectionMatrix = perspectiveProjectionMatrix * modelViewMatrix;
+
+        glUniformMatrix4fv(uiModelViewUniform,
+            1,
+            GL_FALSE, 
+            modelViewMatrix);
+
+        glUniformMatrix4fv(uiProjectionUniform,
+            1,
+            GL_FALSE,
+            perspectiveProjectionMatrix);
+
+        if(true == boKeyOfLightsIsPressed)
+        {
+            glUniform1i(uiKeyOfLightsIsPressedUniform, 1);
+            glUniform3f(ldUniform, 1.0, 1.0, 1.0);
+            glUniform3f(kdUniform, 0.5, 0.5, 0.5);
+            glUniform4f(lightPositionVectorUniform, 0.0f, 0.0f, 2.0f, 1.0f);
+        }
+        else
+        {
+            //print("Entering")
+            glUniform1i(uiKeyOfLightsIsPressedUniform, 0);
+        }
+
+        glBindVertexArray(vao_cube);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        glDrawArrays(GL_TRIANGLE_FAN, 4, 4);
+        glDrawArrays(GL_TRIANGLE_FAN, 8, 4);
+        glDrawArrays(GL_TRIANGLE_FAN, 12, 4);
+        glDrawArrays(GL_TRIANGLE_FAN, 16, 4);
+        glDrawArrays(GL_TRIANGLE_FAN, 20, 4);
+        glBindVertexArray(0);
+        glUseProgram(0);
+
+        fangleCube += 0.3f;
+        if (fangleCube > 360.0f)
+        {
+            fangleCube = 0.0f;
+        }
 
     glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
     [eaglContext presentRenderbuffer:GL_RENDERBUFFER];
@@ -557,7 +633,15 @@ enum
 - (void)onSingleTap:(UITapGestureRecognizer *)gr
 {
     // code
-    // [self setNeedsDisplay]; // repainting
+    if (true == boKeyOfLightsIsPressed)
+    {
+        boKeyOfLightsIsPressed = false;
+    }
+    else
+    {
+        boKeyOfLightsIsPressed = true;
+    }
+
 }
 
 - (void)onDoubleTap:(UITapGestureRecognizer *)gr
@@ -581,32 +665,22 @@ enum
 
 - (void)dealloc
 {
-
-    free(fSpherePositions);
-    fSpherePositions = NULL;
-    free(fSphereNormals);
-    fSphereNormals = NULL;
-    free(fSphereTexturesCoords);
-    fSphereTexturesCoords = NULL;
-    free(indices);
-    indices = NULL;
-
-    if(vbo_sphere_position)
+    if(vbo_normals_cube)
     {
-        glDeleteBuffers(1, &vbo_sphere_position);
-        vbo_sphere_position = 0;
+        glDeleteBuffers(1, &vbo_normals_cube);
+        vbo_normals_cube = 0;
     }
 
-    if(vbo_sphere_elements)
+    if(vbo_position_cube)
     {
-        glDeleteBuffers(1, &vbo_sphere_elements);
-        vbo_sphere_elements = 0;
+        glDeleteBuffers(1, &vbo_position_cube);
+        vbo_position_cube = 0;
     }
 
-    if (vao_sphere)
+    if (vao_cube)
     {
-        glDeleteVertexArrays(1, &vao_sphere);
-        vao_sphere = 0;
+        glDeleteVertexArrays(1, &vao_cube);
+        vao_cube = 0;
     }
 
     if(depthRenderbuffer)

@@ -49,7 +49,7 @@ enum
     GLuint ldUniform;
     GLuint kdUniform;
     GLuint lightPositionVectorUniform;
-    GLuint uiKeyOfLightsIsPressedUniform;
+    GLuint uiKeyOfLightsIsPressed;
 
     bool boKeyOfLightsIsPressed;
 
@@ -332,7 +332,7 @@ enum
         uiProjectionUniform = glGetUniformLocation(shaderProgramObject,
         "u_model_projection_mat" );
 
-        uiKeyOfLightsIsPressedUniform = glGetUniformLocation(shaderProgramObject,
+        uiKeyOfLightsIsPressed = glGetUniformLocation(shaderProgramObject,
         "ui_is_lighting_key_pressed");
 
         ldUniform = glGetUniformLocation(shaderProgramObject,

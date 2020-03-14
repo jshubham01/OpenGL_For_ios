@@ -819,6 +819,7 @@ int ind = 0;
     glBindVertexArray(0);
     [self layoutSubviews];
 
+    /*
     // Jade
     if (true == boKeyOfLightsIsPressed)
     {
@@ -1291,6 +1292,8 @@ int ind = 0;
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
     [self layoutSubviews];
+
+    */
 
     glUseProgram(0);
 

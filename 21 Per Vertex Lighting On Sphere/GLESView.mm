@@ -615,7 +615,7 @@ enum
     vmath::mat4 rotateMatrix = vmath::mat4::identity();
     vmath::mat4 modelViewProjectionMatrix = vmath::mat4::identity();
 
-    modelViewMatrix = vmath::translate(0.0f, 0.0f, -5.0f);
+    modelMatrix = vmath::translate(0.0f, 0.0f, -5.0f);
 
     glUniformMatrix4fv(uiModelMatrixUniform,
             1,

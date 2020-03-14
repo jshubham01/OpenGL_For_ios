@@ -388,23 +388,22 @@ float fAngleRotate = 0.0f;
             }
         }
 
-        uiModelMatrixUniform = glGetUniformLocation(
+        uiModelViewUniform_sj = glGetUniformLocation(
             shaderProgramObject,
-            "u_model_matrix"
+            "u_model_view_mat"
         );
 
-        uiViewMatrixUniform = glGetUniformLocation(
-            shaderProgramObject,
-            "u_view_matrix"
-        );
+        // uiViewMatrixUniform = glGetUniformLocation(
+        //     shaderProgramObject,
+        //     "u_view_matrix"
+        // );
 
         uiProjectionUniform = glGetUniformLocation(
             shaderProgramObject,
-            "u_projection_matrix"
+            "u_model_projection_mat"
         );
 
-        uiKeyOfLightsIsPressed =
-            glGetUniformLocation(
+        uiKeyOfLightsIsPressed = glGetUniformLocation(
                 shaderProgramObject,
                 "ui_is_lighting_key_pressed"
             );

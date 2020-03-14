@@ -179,15 +179,15 @@ int ind = 0;
     vmath:: mat4 perspectiveProjectionMatrix;
     float fAngleRotate;
 
-    GLuint laUniform;
-    GLuint ldUniform;
-    GLuint lsUniform;
-    GLuint lightPositionVectorUniform;
+    GLuint laUniform_sj;
+    GLuint ldUniform_sj;
+    GLuint lsUniform_sj;
+    GLuint lightPositionVectorUniform_sj;
 
-    GLuint kaUniform;
-    GLuint kdUniform;
-    GLuint ksUniform;
-    GLuint shineynessUniform;
+    GLuint kaUniform_sj;
+    GLuint kdUniform_sj;
+    GLuint ksUniform_sj;
+    GLuint shineynessUniform_sj;
 
     bool boKeyOfLightsIsPressed;
     GLuint uiKeyOfLightsIsPressed;
@@ -527,44 +527,44 @@ int ind = 0;
             "u_projection_matrix"
         );
 
-        laUniform = glGetUniformLocation(
+        laUniform_sj = glGetUniformLocation(
             shaderProgramObject,
             "u_la"
         );
 
-        ldUniform = glGetUniformLocation(
+        ldUniform_sj = glGetUniformLocation(
             shaderProgramObject,
             "u_ld"
         );
 
-        lsUniform = glGetUniformLocation(
+        lsUniform_sj = glGetUniformLocation(
             shaderProgramObject,
             "u_ls"
         );
 
-        lightPositionVectorUniform = glGetUniformLocation(
+        lightPositionVectorUniform_sj = glGetUniformLocation(
             shaderProgramObject,
             "u_light_position"
         );
 
-        kaUniform = glGetUniformLocation(
+        kaUniform_sj = glGetUniformLocation(
             shaderProgramObject,
             "u_ka"
         );
 
-        kdUniform = 
+        kdUniform_sj = 
             glGetUniformLocation(
                 shaderProgramObject,
                 "u_kd"
             );
 
-        ksUniform = 
+        ksUniform_sj = 
             glGetUniformLocation(
                 shaderProgramObject,
                 "u_ks"
             );
 
-        shineynessUniform = 
+        shineynessUniform_sj = 
             glGetUniformLocation(
             shaderProgramObject,
             "u_material_shiney_ness"
@@ -790,9 +790,9 @@ int ind = 0;
         	glUniform4f(lightPositionVectorUniform_sj, 0.0f, fCirclePositions[0], fCirclePositions[1] - 10.0f, 1.0f);
         }
 
-        glUniform3fv(laUniform, 1, light_ambient);
-        glUniform3fv(lsUniform, 1, light_specular);
-        glUniform3fv(ldUniform, 1, light_diffused);
+        glUniform3fv(laUniform_sj, 1, light_ambient);
+        glUniform3fv(lsUniform_sj, 1, light_specular);
+        glUniform3fv(ldUniform_sj, 1, light_diffused);
     
         glUniform3fv(kaUniform_sj, 1, material_ambient_emerald);
         glUniform3fv(kdUniform_sj, 1, material_diffused_emerald);

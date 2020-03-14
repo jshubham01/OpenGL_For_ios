@@ -751,8 +751,8 @@ int ind = 0;
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glEnable(GL_POLYGON_OFFSET_FILL);
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    // glEnable(GL_POLYGON_OFFSET_FILL);
     glPolygonOffset(1.0f, 2.5f);
 
     float angle;
@@ -817,7 +817,7 @@ int ind = 0;
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
 
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
     // Jade
     if (true == boKeyOfLightsIsPressed)
@@ -837,7 +837,7 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
     // obsidian
 
@@ -857,7 +857,7 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
     // pearl
     if (true == boKeyOfLightsIsPressed)
@@ -877,7 +877,7 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
     // ruby
     if (true == boKeyOfLightsIsPressed)
@@ -897,7 +897,7 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
     // tuquoise
     if (true == boKeyOfLightsIsPressed)
@@ -917,7 +917,7 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
     //
     // Metals
@@ -940,7 +940,7 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
     // bronze
     if (true == boKeyOfLightsIsPressed)
@@ -960,7 +960,7 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
     // chrome
     if (true == boKeyOfLightsIsPressed)
@@ -980,7 +980,7 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
     // copper
     if (true == boKeyOfLightsIsPressed)
@@ -1000,7 +1000,7 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
     // gold
     if (true == boKeyOfLightsIsPressed)
@@ -1020,7 +1020,7 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
     // silver
     if (true == boKeyOfLightsIsPressed)
@@ -1040,7 +1040,7 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
     //
     // Plastic
@@ -1064,7 +1064,7 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
     // cyan
     if (true == boKeyOfLightsIsPressed)
@@ -1084,7 +1084,7 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
     // green
     if (true == boKeyOfLightsIsPressed)
@@ -1104,7 +1104,7 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
     // red
     if (true == boKeyOfLightsIsPressed)
@@ -1124,7 +1124,7 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
     // white
     if (true == boKeyOfLightsIsPressed)
@@ -1144,7 +1144,7 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
     // Yellow
     if (true == boKeyOfLightsIsPressed)
@@ -1164,7 +1164,7 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
 
     //
@@ -1188,7 +1188,7 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
 
     // cyan
@@ -1209,7 +1209,7 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
     // green
     if (true == boKeyOfLightsIsPressed)
@@ -1229,7 +1229,7 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
 
     // red
@@ -1250,7 +1250,7 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
     // white
     if (true == boKeyOfLightsIsPressed)
@@ -1270,7 +1270,7 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
     // yellow
     if (true == boKeyOfLightsIsPressed)
@@ -1290,11 +1290,11 @@ int ind = 0;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_sphere_elements);
     glDrawElements(GL_TRIANGLES, gNumElements, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    [self reshape];
+    [self layoutSubviews];
 
     glUseProgram(0);
 
-    glDisable(GL_POLYGON_OFFSET_FILL);
+    //glDisable(GL_POLYGON_OFFSET_FILL);
     ind = ind + 2;
     if (ind > 1000)
     {
